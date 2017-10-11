@@ -1,12 +1,21 @@
-## Node Examples for Geeny
+# Getting Started with Formulas - Node HelloWorld Application
 
-This repository contains all the examples for the Getting Started with Formula Development
+This repository contains all of the **ruby** code examples for the Getting
+Started with Formula Development tutorial. Each step in the tutorial is
+separated into its own directory, e.g., `Step1`.
+
+Other languages:
+
+-  [Python](https://github.com/geeny/python-getting-started)
+-  [Ruby](https://github.com/geeny/ruby-getting-started)
 
 ## Dependencies (Local Development)
 
-First you will need a suitable version of NodeJS. We use
-[nvm](https://github.com/creationix/nvm) to control our NodeJS version. To install
-and run dependencies using nvm.
+You need [Node.js version 8.4.0 or greater](https://nodejs.org/en/download/) to develop this project locally.
+
+We use [nvm](https://github.com/creationix/nvm) for controlling the Node.js
+version. To install the dependencies and run the application using nvm, execute
+the following in the command line:
 
 ```
 cd Step-1
@@ -15,7 +24,8 @@ npm install
 node app.js
 ```
 
-By default the `app.js` will use the port 80, which is normally by the OS.
+By default, the application (`app.js`) will use port 80, which is normally used
+by the OS.
 
 ## Dependencies (Docker Development)
 
@@ -25,25 +35,24 @@ installed.
 At Geeny, we use Docker Edge 17.0.*, and this is the version we have used in our
 tests. Other versions are not guaranteed to work with this tutorial.
 
-We also use [docker-compose](https://github.com/docker/compose) to more easily
-declare our app dependencies at the infrastructure level.
+We also use [docker-compose](https://github.com/docker/compose) to 
+declare our app dependencies more easily at the infrastructure level.
 
-To run your service locally, you can run:
+To run the Docker image locally, you can execute the following:
 
 ```
 cd Step-1
 docker-compose build && docker-compose up
 ```
 
-The `docker-compose.yml` file conveniently re-maps the exposed port from the 80 (used
-by Geeny) to 3000
+The `docker-compose.yml` file re-maps the exposed port from 80 (used by Geeny)
+to 3000.
 
-Now visit http://localhost:3000 and the example should be running there.
+When you execute the above commands, visit http://localhost:3000 and
+the example should be running there.
 
 ## License
 
 Copyright (C) 2017 Telefónica Germany Next GmbH, Charlottenstrasse 4, 10969 Berlin.
 
 This project is licensed under the terms of the [Mozilla Public License Version 2.0](LICENSE.md).
-
-Inconsolata font is copyright (C) 2006 The Inconsolata Project Authors. This Font Software is licensed under the [SIL Open Font License, Version 1.1](OFL.txt).
