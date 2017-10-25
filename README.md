@@ -1,6 +1,6 @@
 # Getting Started with Formulas - Node HelloWorld Application
 
-This repository contains all of the **ruby** code examples for the Getting
+This repository contains all of the **node** code examples for the Getting
 Started with Formula Development tutorial. Each step in the tutorial is
 separated into its own directory, e.g., `Step1`.
 
@@ -8,6 +8,7 @@ Other languages:
 
 -  [Python](https://github.com/geeny/python-getting-started)
 -  [Ruby](https://github.com/geeny/ruby-getting-started)
+-  [Java](https://github.com/geeny/java-getting-started)
 
 ## Dependencies (Local Development)
 
