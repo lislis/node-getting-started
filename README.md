@@ -24,8 +24,7 @@ npm install
 node app.js
 ```
 
-By default, the application (`app.js`) will use port 80, which is normally used
-by the OS.
+By default the `app.js` will use the port 80, which requires root access.
 
 ## Dependencies (Docker Development)
 
@@ -35,7 +34,7 @@ installed.
 At Geeny, we use Docker Edge 17.0.*, and this is the version we have used in our
 tests. Other versions are not guaranteed to work with this tutorial.
 
-We also use [docker-compose](https://github.com/docker/compose) to 
+We also use [docker-compose](https://github.com/docker/compose) to
 declare our app dependencies more easily at the infrastructure level.
 
 To run the Docker image locally, you can execute the following:
