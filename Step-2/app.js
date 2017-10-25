@@ -6,8 +6,16 @@ app.get('/', function (req, res) {
   res.send('Hello Node!')
 })
 
-app.get('/messages', function (req, res) {
-  res.send('Messages Placeholder')
+app.get('/messages', async function (req, res) {
+  try {
+    const shards = await(appBroker.getShards())
+    // Consume only first shard
+    const iterator = await(appBroker.getIterator(shards[0].shardId))
+    const messages = await(appBroker.getMessages(iterator, processData))
+    res.send(JSON.stringify(messages))
+  } catch(err) {
+    res.send(`Error calling app-broker: ${err.message}`)
+  }
 })
 
 app.listen(80, function () {

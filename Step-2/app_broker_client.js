@@ -12,22 +12,22 @@ const brokerConfig = {
   maxBatchSize: 10
 }
 
-module.exports = {
-  request: async function (method, url, data) {
-    try {
-      const response = await axios.request({
-	method: method,
-	url: url,
-	headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-	},
-	data: data
-      })
-      return response.data
-    } catch (err) { throw err }
-  },
+async function request(method, url, data) {
+  try {
+    const response = await axios.request({
+      method: method,
+      url: url,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      data: data
+    })
+    return response.data
+  } catch (err) { throw err }
+}
 
+module.exports = {
   getShards: async function () {
     try {
       const url = `${host}/${brokerConfig.appId}/messageType/${brokerConfig.messageTypeId}`
@@ -53,26 +53,23 @@ module.exports = {
     }
   },
 
-  getMessages: async function  (iterator, processData) {
+  getMessages: async function (iterator) {
     try {
       const url = `${host}/${brokerConfig.appId}/messageType/${brokerConfig.messageTypeId}/iterator/${iterator}`
       const data = await request('get', url)
 
       if (data.messages.length > 0) {
-	for (let message of data.messages) {
-	  let parsedData = {
+	let parsedMessages = data.messages.map(function (messsage) {
+	  return {
 	    userId: message.userId,
 	    thingId: message.thingId,
 	    data: base64.decode(message.payload)
-	  }
-
-	  processData(parsedData)
-	}
-	sleep.msleep(250)
+	  };
+	})
+	return { nextIterator: data.nextIterator, messages: parsedMessages }
       } else {
-	sleep.sleep(1)
+	return { nextIterator: null, messages: [] }
       }
-      getMessages(data.nextIterator, processData)
     } catch (err) {
       log(`Error in getIterator: ${err.message}`)
       throw err
