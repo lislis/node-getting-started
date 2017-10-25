@@ -11,7 +11,8 @@ app.get('/messages', async function (req, res) {
     const shards = await(appBroker.getShards())
     // Consume only first shard
     const iterator = await(appBroker.getIterator(shards[0].shardId))
-    const messages = await(appBroker.getMessages(iterator, processData))
+    // Get messages
+    const messages = await(appBroker.getMessages(iterator))
     res.send(JSON.stringify(messages))
   } catch(err) {
     res.send(`Error calling app-broker: ${err.message}`)
