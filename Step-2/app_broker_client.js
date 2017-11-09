@@ -6,10 +6,10 @@ const appId = process.env["GEENY_APPLICATION_ID"]
 const host = process.env["GEENY_APPLICATION_BROKER_URL"]
 
 const brokerConfig = {
-  appId: appId,
-  messageTypeId: null, // Insert Message Type Id for Test Datasource
-  iteratorType: 'EARLIEST',
-  maxBatchSize: 10
+  appId:         appId,
+  messageTypeId: "75d93472-4b81-46f1-848c-bfa8bf6de881"
+  iteratorType:  'EARLIEST',
+  maxBatchSize:  10
 }
 
 async function request(method, url, data) {
