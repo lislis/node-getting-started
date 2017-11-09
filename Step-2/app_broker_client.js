@@ -68,7 +68,7 @@ module.exports = {
 	})
 	return { nextIterator: data.nextIterator, messages: parsedMessages }
       } else {
-	return { nextIterator: null, messages: [] }
+	return { nextIterator: null, messages: [], data: data }
       }
     } catch (err) {
       log(`Error in getIterator: ${err.message}`)

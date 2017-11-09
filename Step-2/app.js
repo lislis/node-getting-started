@@ -6,13 +6,19 @@ app.get('/', function (req, res) {
   res.send('Hello Node!')
 })
 
+var lastIterator = null
+
 app.get('/messages', async function (req, res) {
   try {
-    const shards = await(appBroker.getShards())
-    // Consume only first shard
-    const iterator = await(appBroker.getIterator(shards[0].shardId))
+    if(iterator == null) {
+      const shards = await(appBroker.getShards())
+      // Consume only first shard
+      lastIterator = await(appBroker.getIterator(shards[0].shardId))
+    }
+
     // Get messages
-    const messages = await(appBroker.getMessages(iterator))
+    const messages = await(appBroker.getMessages(lastIterator))
+    lastIterator = messages.nextIterator
     res.send(JSON.stringify(messages))
   } catch(err) {
     res.send(`Error calling app-broker: ${err.message}`)
