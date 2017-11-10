@@ -12,7 +12,7 @@ have to do some API calls.
 The Application Broker is the part of the system that sends all the data your app
 needs. It's the communication bridge between your formula and our platform.
 
-# `app_broker_client.js`
+## `app_broker_client.js`
 
 ```javascript
 const axios = require('axios')
@@ -65,6 +65,7 @@ calls. For more details you can refer to the AppBroker API documentation (link).
 Having done this, we are ready to get some IoT sensor data and display it in our
 app. Let's go back to `app.js` to use our newly created app-broker-client.
 
+## `app.js`
 
 ```
 var lastIterator = null
