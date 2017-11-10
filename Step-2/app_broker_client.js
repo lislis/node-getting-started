@@ -7,9 +7,14 @@ const host = process.env["GEENY_APPLICATION_BROKER_URL"]
 
 const brokerConfig = {
   appId:         appId,
-  messageTypeId: "75d93472-4b81-46f1-848c-bfa8bf6de881"
+  // From: https://developers.geeny.io/explorer/message-types/75d93472-4b81-46f1-848c-bfa8bf6de881
+  messageTypeId: "75d93472-4b81-46f1-848c-bfa8bf6de881",
   iteratorType:  'EARLIEST',
   maxBatchSize:  10
+}
+
+function log(msg) {
+  console.log(msg);
 }
 
 async function request(method, url, data) {

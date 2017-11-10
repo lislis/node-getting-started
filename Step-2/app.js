@@ -10,7 +10,7 @@ var lastIterator = null
 
 app.get('/messages', async function (req, res) {
   try {
-    if(iterator == null) {
+    if(lastIterator == null) {
       const shards = await(appBroker.getShards())
       // Consume only first shard
       lastIterator = await(appBroker.getIterator(shards[0].shardId))
