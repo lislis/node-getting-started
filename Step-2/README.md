@@ -4,8 +4,17 @@ We haven't done IoT. Step-1 only got us to deploy a simple web-app in some manag
 infrastructure. It's not clear yet whether Geeny is an IoT platform since we haven't
 interacted with IoT devices.
 
-In order to consume IoT sensor data (element subscriptions in Geeny terms) we just
-have to do some API calls.
+In order to consume IoT sensor data, two steps are necessary.
+
+First: The end-user (i.e the owner of the device) should grant permission to the
+formula to access the device data. This is commonly known as subscribing.
+
+Second: Once the formula is subscribed to users' devices, you can call the
+application broker to get your user's data.
+
+For the time being, let's ignore the first step. Geeny automatically subscribes its
+developers to their devices. This makes prototyping and playing around with data
+easier and fun. We'll come back to authentication and authorization in the Step 3.
 
 ## A Simple Wrapper for the Application Broker API.
 
@@ -13,6 +22,9 @@ The Application Broker is the part of the system that sends all the data your ap
 needs. It's the communication bridge between your formula and our platform.
 
 ## `app_broker_client.js`
+
+First import all the necessary dependencies. Load environment variables that we will
+need to contact the app-broker service.
 
 ```javascript
 const axios = require('axios')
@@ -23,24 +35,39 @@ const appId = process.env["GEENY_APPLICATION_ID"]
 const host = process.env["GEENY_APPLICATION_BROKER_URL"]
 const authToken = process.env["GEENY_APPLICATION_AUTH_TOKEN"]
 ```
+Second, we need to configure it so it points to the right device. The data a device
+sends uses an identifier that acts as the data schema. This is called the
+messageTypeId. Each device's data has a messageTypeId. Right now we configured it to
+use the Garmin Simulator device. This device replays garmin fitness wearable. You can
+configure this messageTypeId to use any of the available devices, and for this
+purpose we have a handy tool to explore Geeny's devices. Geeny's
+[DataExplorer](https://developers.geeny.io/explorer) it's like the yellow-pages of
+the available devices that are Geeny-compatible.
 
-First import all the necessary dependencies. Load environment variables that we'll
-need to contact the app-broker service.
+Additionally, you can select the batch-size but also whether you want to consume
+either the EARLIEST or LATEST messages. There's no better way, it depends on your
+formula's requirements.
 
-```
+```javascript
+// Link in the DataExplorer: https://developers.geeny.io/explorer/message-types/75d93472-4b81-46f1-848c-bfa8bf6de881
 const brokerConfig = {
   appId:         appId,
-  // From: https://developers.geeny.io/explorer/message-types/75d93472-4b81-46f1-848c-bfa8bf6de881
   messageTypeId: "75d93472-4b81-46f1-848c-bfa8bf6de881",
   iteratorType:  'EARLIEST', // 'LATEST' is an option too
   maxBatchSize:  10
 }
 ```
 
-We need to decide what kind of sensor data we want to consume. Here we use our
-data-explorer to find the simulator-data since we don't know what kind of IoT devices
-you have access to. You can select the batch-size but also whether you want to
-consume either the EARLIEST or LATEST messages.
+## Creating a wrapper for the Application Broker ##
+
+This is the core of our App-Broker-Client. It wraps the REST API using async
+calls. There's a shards call to know in how many partitions your data is being
+sent. An iterator that gives you a "pointer" or "checkpoint" to your data. And
+finally, a getMessages that retrieves the messages from a given iterator and the ID
+of the next iterator.
+
+For more details you can refer to the [AppBroker API
+documentation](https://docs.geeny.io/api/application-broker/).
 
 
 ```javascript
@@ -59,26 +86,31 @@ module.exports = {
 }
 ```
 
-This is the core of our App-Broker-Client. It wraps the REST API using async
-calls. For more details you can refer to the AppBroker API documentation (link).
-
-Having done this, we are ready to get some IoT sensor data and display it in our
-app. Let's go back to `app.js` to use our newly created app-broker-client.
-
 ## `app.js`
+
+Now that we have all the tools, we are ready to wire it all up and make a formula
+that demos data consumption.
+
+This snippet does the following:
+
+1. Initializes the iterator if needed
+2. Gets the data of the iterator
+3. Updates the iterator to the new position
+4. Renders the data as json in the /messages endpoint of your formula.
 
 ```
 var lastIterator = null
 app.get('/messages', async function (req, res) {
   try {
     if(lastIterator == null) {
+	  // Get the shard information about the given message type
       const shards = await(appBroker.getShards())
       // Consume only first shard
       lastIterator = await(appBroker.getIterator(shards[0].shardId))
     }
 
-    // Get messages
-    const messages = await(appBroker.getMessages(lastIterator))
+    // With the current iterator, get the messages and the next iterator.
+    const messages = await(appBroker.getMessages(lastIterator))\
     lastIterator = messages.nextIterator
     res.send(JSON.stringify(messages))
   } catch(err) {
@@ -87,14 +119,8 @@ app.get('/messages', async function (req, res) {
 })
 ```
 
-In order to consume messages we use a nasty `global-variable` for simplicity's
-sake.
-
-If you deploy this formula, you will get "[your-url]/messages".
-
-First time we access the data-stream we go to the beginning of it. Later
-renderings of that page would continue consuming the next messages and showing
-different data.
+Go ahead, deploy the formula and if you go to  "[your-formula-url]/messages" you
+should see some garmin messages.
 
 ```
 (Missing data of the succesful run of the example)
