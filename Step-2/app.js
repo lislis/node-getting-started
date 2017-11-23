@@ -19,8 +19,10 @@ app.get('/messages', async function (req, res) {
     // Get messages
     const messages = await(appBroker.getMessages(lastIterator))
     lastIterator = messages.nextIterator
+
     res.send(JSON.stringify(messages))
   } catch(err) {
+    console.error(err.message)
     res.send(`Error calling app-broker: ${err.message}`)
   }
 })
