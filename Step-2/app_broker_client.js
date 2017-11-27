@@ -3,12 +3,13 @@ const sleep = require('sleep')
 const base64 = require('base-64')
 
 const appId = process.env["GEENY_APPLICATION_ID"]
-const host = process.env["GEENY_APPLICATION_BROKER_URL"]
+const host = process.env["GEENY_APPLICATION_BROKER_SUBSCRIBER_URL"]
+const token = process.env["GEENY_APPLICATION_AUTH_TOKEN"]
 
 const brokerConfig = {
   appId:         appId,
-  // From: https://developers.geeny.io/explorer/message-types/75d93472-4b81-46f1-848c-bfa8bf6de881
-  messageTypeId: "garmin-summaries-dailies",
+  // From: https://developers.geeny.io/explorer/message-types/bce77a84-2382-4940-a0f8-7643be5c6a64
+  messageTypeId: "bce77a84-2382-4940-a0f8-7643be5c6a64",
   iteratorType:  'EARLIEST',
   maxBatchSize:  10
 }
@@ -24,7 +25,8 @@ async function request(method, url, data) {
       url: url,
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `JWT ${token}`
       },
       data: data
     })
@@ -44,13 +46,12 @@ module.exports = {
   getIterator: async function (shardId) {
     try {
       const data = {
-	shardId: shardId,
-	iteratorType: brokerConfig.iteratorType,
-	maxBatchSize: brokerConfig.maxBatchSize
+        shardId: shardId,
+        iteratorType: brokerConfig.iteratorType,
+        maxBatchSize: brokerConfig.maxBatchSize
       }
 
       const iterator = await request('post', `${host}/${brokerConfig.appId}/messageType/${brokerConfig.messageTypeId}/iterator`, data)
-
       return iterator.shardIterator
     } catch (err) {
       log(`Error in getIterator, ERROR: ${err.message}`)
@@ -64,16 +65,16 @@ module.exports = {
       const data = await request('get', url)
 
       if (data.messages.length > 0) {
-	let parsedMessages = data.messages.map(function (messsage) {
-	  return {
-	    userId: message.userId,
-	    thingId: message.thingId,
-	    data: base64.decode(message.payload)
-	  };
-	})
-	return { nextIterator: data.nextIterator, messages: parsedMessages }
+	      let parsedMessages = data.messages.map(function (message) {
+          return {
+            userId: message.userId,
+            thingId: message.thingId,
+            data: base64.decode(message.payload)
+          }
+	      })
+	      return { nextIterator: data.nextIterator, messages: parsedMessages }
       } else {
-	return { nextIterator: null, messages: [], data: data }
+	      return data
       }
     } catch (err) {
       log(`Error in getIterator: ${err.message}`)

@@ -1,0 +1,4 @@
+node_modules
+*.sh
+*.json
+!package-lock.json
