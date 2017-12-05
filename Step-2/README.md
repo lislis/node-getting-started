@@ -99,21 +99,27 @@ This snippet does the following:
 4. Renders the data as json in the /messages endpoint of your formula.
 
 ```
-var lastIterator = null
+const parameters = {
+  messageTypeId: "bce77a84-2382-4940-a0f8-7643be5c6a64",
+  iteratorType:  'EARLIEST',
+  maxBatchSize:  10
+}
+
 app.get('/messages', async function (req, res) {
   try {
     if(lastIterator == null) {
-	  // Get the shard information about the given message type
-      const shards = await(appBroker.getShards())
+      const shards = await(appBroker.getShards(parameters))
       // Consume only first shard
-      lastIterator = await(appBroker.getIterator(shards[0].shardId))
+      lastIterator = await(appBroker.getIterator(parameters, shards[0].shardId))
     }
 
-    // With the current iterator, get the messages and the next iterator.
-    const messages = await(appBroker.getMessages(lastIterator))\
+    // Get messages
+    const messages = await(appBroker.getMessages(parameters, lastIterator))
     lastIterator = messages.nextIterator
+
     res.send(JSON.stringify(messages))
   } catch(err) {
+    console.error(err.message)
     res.send(`Error calling app-broker: ${err.message}`)
   }
 })
