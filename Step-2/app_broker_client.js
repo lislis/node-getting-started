@@ -3,16 +3,8 @@ const sleep = require('sleep')
 const base64 = require('base-64')
 
 const appId = process.env["GEENY_APPLICATION_ID"]
-const host = process.env["GEENY_APPLICATION_BROKER_SUBSCRIBER_URL"]
+const host  = process.env["GEENY_APPLICATION_BROKER_SUBSCRIBER_URL"]
 const token = process.env["GEENY_APPLICATION_AUTH_TOKEN"]
-
-const brokerConfig = {
-  appId:         appId,
-  // From: https://developers.geeny.io/explorer/message-types/bce77a84-2382-4940-a0f8-7643be5c6a64
-  messageTypeId: "bce77a84-2382-4940-a0f8-7643be5c6a64",
-  iteratorType:  'EARLIEST',
-  maxBatchSize:  10
-}
 
 function log(msg) {
   console.log(msg);
@@ -35,23 +27,25 @@ async function request(method, url, data) {
 }
 
 module.exports = {
-  getShards: async function () {
+  getShards: async function (parameters) {
     try {
-      const url = `${host}/${brokerConfig.appId}/messageType/${brokerConfig.messageTypeId}`
+      const url = `${host}/${appId}/messageType/${parameters.messageTypeId}`
       const response = await request('get', url)
       return response.shards
     } catch (err) { throw err }
   },
 
-  getIterator: async function (shardId) {
+  getIterator: async function (parameters, shardId) {
     try {
       const data = {
         shardId: shardId,
-        iteratorType: brokerConfig.iteratorType,
-        maxBatchSize: brokerConfig.maxBatchSize
+        iteratorType: parameters.iteratorType,
+        maxBatchSize: parameters.maxBatchSize
       }
 
-      const iterator = await request('post', `${host}/${brokerConfig.appId}/messageType/${brokerConfig.messageTypeId}/iterator`, data)
+      const url = `${host}/${appId}/messageType/${parameters.messageTypeId}/iterator`
+      const iterator = await request('post', url, data)
+
       return iterator.shardIterator
     } catch (err) {
       log(`Error in getIterator, ERROR: ${err.message}`)
@@ -59,22 +53,22 @@ module.exports = {
     }
   },
 
-  getMessages: async function (iterator) {
+  getMessages: async function (parameters, iterator) {
     try {
-      const url = `${host}/${brokerConfig.appId}/messageType/${brokerConfig.messageTypeId}/iterator/${iterator}`
+      const url = `${host}/${appId}/messageType/${parameters.messageTypeId}/iterator/${iterator}`
       const data = await request('get', url)
 
       if (data.messages.length > 0) {
-	      let parsedMessages = data.messages.map(function (message) {
+	let parsedMessages = data.messages.map(function (message) {
           return {
             userId: message.userId,
             thingId: message.thingId,
             data: base64.decode(message.payload)
           }
-	      })
-	      return { nextIterator: data.nextIterator, messages: parsedMessages }
+	})
+	return { nextIterator: data.nextIterator, messages: parsedMessages }
       } else {
-	      return data
+	return data
       }
     } catch (err) {
       log(`Error in getIterator: ${err.message}`)
