@@ -6,13 +6,13 @@ app.get('/', function (req, res) {
   res.send('Hello Node!')
 })
 
-var lastIterator = null
-
 const parameters = {
   messageTypeId: "bce77a84-2382-4940-a0f8-7643be5c6a64",
   iteratorType:  'EARLIEST',
   maxBatchSize:  10
 }
+
+var lastIterator = null
 
 app.get('/messages', async function (req, res) {
   try {

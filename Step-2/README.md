@@ -105,6 +105,8 @@ const parameters = {
   maxBatchSize:  10
 }
 
+var lastIterator = null
+
 app.get('/messages', async function (req, res) {
   try {
     if(lastIterator == null) {
