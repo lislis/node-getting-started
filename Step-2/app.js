@@ -14,25 +14,36 @@ const parameters = {
 
 var lastIterator = null
 
-app.get('/messages', async function (req, res) {
-  try {
-    if(lastIterator == null) {
-      const shards = await(appBroker.getShards(parameters))
-      // Consume only first shard
-      lastIterator = await(appBroker.getIterator(parameters, shards[0].shardId))
-    }
-
-    // Get messages
-    const messages = await(appBroker.getMessages(parameters, lastIterator))
-    lastIterator = messages.nextIterator
-
-    res.send(JSON.stringify(messages))
-  } catch(err) {
-    console.error(err.message)
-    res.send(`Error calling app-broker: ${err.message}`)
-  }
-})
+app.get('/messages', handleMessages)
 
 app.listen(80, function () {
   console.log('Example app listening on port 80!')
 })
+
+async function handleMessages (req, res) {
+  try {
+    const messages = await(getMessages(req))
+    res.send(JSON.stringify(messages))
+  } catch(err) {
+    // Iterator expired - request another one and try again
+    if(err.response && err.response.status == 404) {
+      lastIterator = null
+      handleMessages(req, res)
+    } else {
+        res.send(`Error calling app-broker: ${err.message}`)
+    }
+  }
+}
+
+async function getMessages(req) {
+  if(lastIterator == null) {
+    const shards = await(appBroker.getShards(parameters))
+    // Consume only first shard
+    lastIterator = await(appBroker.getIterator(parameters, shards[0].shardId))
+  }
+
+  // Get messages
+  const messages = await(appBroker.getMessages(parameters, lastIterator))
+  lastIterator = messages.nextIterator
+  return messages
+}
